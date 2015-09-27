@@ -13,6 +13,9 @@ found ways around them.
 I would like to expand your horizons when it comes to Haskell, as a language,
 and also introduce you to few GHC language extensions.
 
+This is a shallow talk, it doesn't go in to details or too deep in to the
+problems, its here just to inspire you to do that your self.
+
 
 # Values, Types, and Kinds
 
