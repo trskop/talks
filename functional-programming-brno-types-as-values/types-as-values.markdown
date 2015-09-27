@@ -139,6 +139,7 @@ Eh, not really.
 {-# LANGUAGE PolyKinds #-}
 
 data Proxy (a :: k) = Proxy
+    -- Defined in ‘Data.Proxy’
 ```
 
 Do I need to care about `PolyKinds`? That depends. Do you want to be ready for
@@ -290,7 +291,7 @@ Nothing ever happens in this town.
 ## Same Food, Multiple Flavors
 
 Get down and dirty with phantom types on a first date. Don't forget to be safe,
-use [tagged](https://hackage.haskell.org/package/tagged).
+and use [tagged](https://hackage.haskell.org/package/tagged).
 
 <div class="incremental">
 ```Haskell
