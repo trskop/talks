@@ -1,9 +1,18 @@
-% Types as Values
+% Types as Values: Derive correctness from practicality
 % Peter Trško \<<peter.trsko@gmail.com>\>
 % 30th May, 2015
 
 
 # Introduction
+
+## Introduction
+
+There are corner cases where Haskell doesn't shine that well, but smart people
+found ways around them.
+
+I would like to expand your horizons when it comes to Haskell, as a language,
+and also introduce you to few GHC language extensions.
+
 
 # Values, Types, and Kinds
 
@@ -14,36 +23,62 @@ value :: type
 type :: kind
 ```
 
-## Haskell Type Hierarchy (example)
+<div class="incremental">
+<div>
+Values have types:
 
 ```Haskell
-1 :: Int
-Int :: *
+True :: Bool
+map :: (a -> b) -> [a] -> [b]
 ```
+</div>
+
+<div>
+Types have kinds:
+
+```Haskell
+Int :: *
+Maybe :: * -> *
+(->) :: * -> * -> *
+```
+</div>
+
+And all the way up, until you reach co-turtles.
+</div>
+
 
 # Information Loss
 
-## read . show
+## Information Loss
 
 ```Haskell
 read . show
 ```
 
-<div class="incremental">
 Have you ever tried this? Lets try it together, in GHCi.
 
+
+## read . show
+
+```Haskell
+GHCi> read . show $ True
 ```
-[ someone@something types-as-values ]$ ghci
-GHCi, version 7.10.1: http://www.haskell.org/ghc/  :? for help
-Prelude> read . show $ True
+
+
+## read . show
+
+```Haskell
+GHCi> read . show $ True
 *** Exception: Prelude.read: no parse
 ```
 
-What the `<$>` happened? Let us investigate.
+<div class="incremental">
+What the <code class="sourceCode haskell"><span
+class="fu">&lt;$&gt;</span></code> happened? Let us investigate.
 
-```
-Prelude> :set -Wall
-Prelude> read . show $ True
+```Haskell
+GHCi> :set -Wall
+GHCi> read . show $ True
 
 <interactive>:4:1: Warning:
     Defaulting the following constraint(s) to type ‘()’
@@ -55,15 +90,15 @@ Prelude> read . show $ True
 ```
 </div>
 
+
 ## read . show (again)
 
-<div class="incremental">
-
-```Haskell
+```{.haskell}
 -- Type signature intentionally omitted.
 example = read . show $ True
 ```
 
+<div class="incremental">
 ```Haskell
 [ someone@something types-as-values ]$ ghci information-loss-example.hs 
 GHCi, version 7.10.1: http://www.haskell.org/ghc/  :? for help
@@ -86,8 +121,8 @@ information-loss-example.hs:2:8:
     In the expression: read . show $ True
 Failed, modules loaded: none.
 ```
-
 </div>
+
 
 ## Phantom of The Type (Soap)Opera
 
@@ -108,6 +143,10 @@ data Proxy (a :: k) = Proxy
 
 Do I need to care about `PolyKinds`? That depends. Do you want to be ready for
 dependent types in Haskell?
+</div>
+
+
+## Phantom of The Type (Soap)Opera (cont.)
 
 ```Haskell
 {-# LANGUAGE TupleSections #-}
@@ -123,27 +162,100 @@ showMe = (, Proxy) . show
 
 example = readMe . showMe $ True
 ```
-</div>
+
+<div class="incremental">
+```Haskell
+GHCi> example
+True
+```
 
 We have just successfully passed around a type variable.
+</div>
 
 
 # The Phantom Menace, err, Delight
 
 ## This Tea You Serve is Delightful 
 
-<div class="incremental">
-
-<div>
 * We can pass around types as first class citizens.
-</div><div>
-* Phantom types passed using `Proxy` allow us to get rid of those ugly
-  `undefined :: Type` expressions.
-</div><div>
+* Phantom types passed using `Proxy` allow us to get rid of these ugly
+  <code class="sourceCode haskell"><span class="ot">undefined ::</span> <span
+  class="kw">type</span></code> expression.
+
+<div class="incremental">
 Wait, that's it?! No, we are just getting started.
+
+```Haskell
+Data.Typeable.typeRep :: Typeable a => proxy a -> TypeRep
+```
+
+```Haskell
+GHCi> typeRep (Proxy :: Proxy (Maybe Int))
+Maybe Int
+```
+
+```Haskell
+GHC.TypeLits.symbolVal :: KnownSymbol n => proxy n -> String
+```
+
+```Haskell
+GHCi> :set -XDataKinds
+GHCi> symbolVal (Proxy :: Proxy "type-level-string")
+"type-level-string"
+```
 </div>
 
+
+## Apples And Oranges Do Not Mix Well
+
+```Haskell
+{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE PolyKinds #-}
+
+import Data.Proxy
+
+
+newtype Weight (t :: k) = Weight {getWeight :: Rational}
+  deriving (Num, Show)
+
+data Apple
+data Orange
+
+ofApples :: Proxy Apple
+ofApples = Proxy
+
+ofOranges :: Proxy Orange
+ofOranges = Proxy
+
+sumWeight :: Proxy t -> [Weight t] -> Weight t
+sumWeight Proxy = sum
+```
+
+
+## Apples And Oranges Do Not Mix Well (cont.)
+
+```Haskell
+GHCi> sumWeight ofApples [1,2,3] + sumWeight ofApples [1,2,3]
+Weight {getWeight = 12 % 1}
+```
+
+<div class="incremental">
+```Haskell
+GHCi> sumWeight ofApples [1,2,3] + sumWeight ofOranges [1,2,3]
+
+<interactive>:19:40:
+    Couldn't match type ‘Orange’ with ‘Apple’
+    Expected type: Proxy Apple
+      Actual type: Proxy Orange
+    In the first argument of ‘sumWeight’, namely ‘ofOranges’
+    In the second argument of ‘(+)’, namely
+      ‘sumWeight ofOranges [1, 2, 3]’
+```
 </div>
+
+
+# Real-World Phantom Types
 
 ## Exception Handling
 
@@ -160,76 +272,171 @@ ignoring m proxy = m `catch` \e -> handler (e `asProxyTypeOf` proxy)
   where
     handler _ = return ()
 
-example :: IO ()
-example = do
+main :: IO ()
+main = do
     error "Hear, hear, we have an ERROR in our land!"
         `ignoring` someException
     putStrLn "Nothing ever happens in this town."
 ```
 
-## Apples And Oranges Do Not Mix Well
-
-```Haskell
-{-# LANGUAGE DataKinds #-}
-{-# LANGUAGE PolyKinds #-}
-
-import Data.Coerce
-
-
-newtype Weight (t :: k) = Weight {getWeight :: Rational}
-
-data Apple
-data Orange
-
-type AppleIdx = Weight Apple
-type OrangeIdx = Weight Orange
-
-sumWeight :: [Weight t] -> Weight t
-sumWeight = Weight . sum . map getWeight
-```
-
 <div class="incremental">
-```Haskell
-sumWeight' :: [Weight t] -> Weight t
-sumWeight' = coerce . sumRational . coerce
-  where
-    sumRational = sum :: [Rational] -> Rational
+```
+GHCi> :main
+Nothing ever happens in this town.
 ```
 </div>
 
 
 ## Same Food, Multiple Flavors
 
-Get down and dirty with phantom types on a first date. Don't forget to be safe
-with [tagged](https://hackage.haskell.org/package/tagged).
+Get down and dirty with phantom types on a first date. Don't forget to be safe,
+use [tagged](https://hackage.haskell.org/package/tagged).
+
+<div class="incremental">
+```Haskell
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE OverloadedStrings #-}
+import Data.Aeson as Aeson
+import Data.Tagged
+import Data.ByteString.Lazy.Char8 as Lazy
+import System.Process
+
+data AsObject
+data AsArray
+
+instance (ToJSON a, ToJSON b) => ToJSON (Tagged AsObject (a, b)) where
+    toJSON (Tagged (a, b)) = Aeson.object
+        [ "first"  .= a
+        , "second" .= b
+        ]
+
+instance (ToJSON a, ToJSON b) => ToJSON (Tagged AsArray (a, b)) where
+    toJSON (Tagged (a, b)) = toJSON [toJSON a, toJSON b]
+```
+</div>
+
+
+## Same Food, Multiple Flavors (cont.)
 
 ```Haskell
-{-# LANGUAGE DefaultSignatures #-}
-{-# LANGUAGE FlexibleContexts #-}
-import Data.Tagged
-import Data.Monoid
-import Data.Coerce
-import Data.Proxy
+asObject :: a -> Tagged AsObject a
+asObject = Tagged
 
+asArray :: a -> Tagged AsArray a
+asArray = Tagged
 
-class Wrapp t where
-    wrapped :: Proxy t -> (t a -> t a) -> a -> a
-
-    default wrapped
-        :: (Coercible a (t a), Coercible (t a) a)
-        => Proxy t -> (t a -> t a) -> a -> a
-    wrapped _ = (coerce .) . (. coerce)
-
-    wrappedFold :: Proxy t -> ([t a] -> t a) -> [a] -> a
-
-    default wrappedFold
-        :: (Coercible [a] [t a], Coercible (t a) a)
-        => Proxy t -> ([t a] -> t a) -> [a] -> a
-    wrappedFold _ = (coerce .) . (. coerce)
-
-instance Wrapp Sum
-instance Wrapp Product
+printPrettyJson :: Lazy.ByteString -> IO ()
+printPrettyJson json =
+    readProcess "jq" [".", "-C"] (unpack json) >>= Prelude.putStr
 ```
+
+<div class="incremental">
+```Haskell
+GHCi> printPrettyJson . encode $ asObject (1 :: Int, "foo")
+{
+  "second": "foo",
+  "first": 1
+}
+GHCi> printPrettyJson . encode $ asArray (1 :: Int, "foo")
+[
+  1,
+  "foo"
+]
+```
+</div>
+
+
+## Beyond The Infinite
+
+Last example is little bit longer, and Web related.
+
+<div class="incremental">
+```Haskell
+{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE DeriveDataTypeable #-}
+{-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE TypeOperators #-}
+import Data.Char (toLower)
+import Data.Data (Data(toConstr), Typeable, showConstr)
+import Data.Monoid ((<>))
+import Data.String (IsString(fromString))
+import Data.Proxy (Proxy(Proxy))
+
+import Data.Text (Text)
+
+import Data.CaseInsensitive as CI (mk)
+import Web.PathPieces (PathPiece(fromPathPiece, toPathPiece))
+import Web.Spock.Safe
+```
+</div>
+
+
+## Beyond The Infinite (cont.)
+
+```Haskell
+data StarTrekTerm = Scotty | Spock | Warp
+  deriving (Bounded, Data, Enum, Eq, Ord, Typeable)
+
+instance PathPiece StarTrekTerm where
+    fromPathPiece txt = CI.mk txt `lookup` [(str v, v) | v <- terms]
+      where
+        str = fromString . showConstr . toConstr
+        terms = [minBound..maxBound :: StarTrekTerm]
+
+    toPathPiece = fromString . map toLower . showConstr . toConstr
+
+toUrl :: StarTrekTerm -> Text
+toUrl = (packageUrl <>) . \case
+    Scotty -> "scotty"
+    Spock -> "Spock"
+    Warp -> "warp"
+  where
+    packageUrl = "https://hackage.haskell.org/package/"
+```
+
+
+## Beyond The Infinite (cont.)
+
+```Haskell
+starTrekTerm :: Proxy StarTrekTerm
+starTrekTerm = Proxy
+
+varOf :: (Typeable a, PathPiece a) => Proxy a -> Path (a ': '[])
+varOf _ = var
+
+main :: IO ()
+main = runSpock 3000 . spockT id
+    . get ("haskell-package/by-star-trek-term" <//> varOf starTrekTerm)
+        $ \term -> text $ toUrl term <> "\n"
+```
+
+<div class="incremental">
+```Haskell
+GHCi> :t get ("haskell-package/by-star-trek-term" <//> varOf starTrekTerm)
+get ("haskell-package/by-star-trek-term" <//> varOf starTrekTerm)
+    :: Control.Monad.IO.Class.MonadIO m
+    => Data.HVect.HVectElim '[StarTrekTerm] (ActionCtxT ctx m ())
+    -> SpockCtxT ctx m ()
+```
+
+```
+[ someone@somewhere types-as-values ]$ curl localhost:3000/haskell-package/by-star-trek-term/spock
+https://hackage.haskell.org/package/Spock
+[ someone@somewhere types-as-values ]$ curl localhost:3000/haskell-package/by-star-trek-term/foo; echo
+<html><head><title>404 - File not found</title></head><body><h1>404 - File not found</h1></body></html>
+```
+</div>
+
+
+# Outro
+
+## Outro
+
+Thank you for your attention.
+
+If you have any questions then you can ask me personally, or on FPB mailing
+list, or on my personal email.
 
 <!--
 vim: filetype=markdown spell spelllang=en
