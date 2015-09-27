@@ -237,19 +237,22 @@ ofOranges = Proxy
 
 sumWeight :: Proxy t -> [Weight t] -> Weight t
 sumWeight Proxy = sum
+
+weight :: Proxy t -> Weight t -> Weight t
+weight Proxy = id
 ```
 
 
 ## Apples And Oranges Do Not Mix Well (cont.)
 
 ```Haskell
-GHCi> sumWeight ofApples [1,2,3] + sumWeight ofApples [1,2,3]
+GHCi> sumWeight ofApples [1,2,3] + weight ofApples 6
 Weight {getWeight = 12 % 1}
 ```
 
 <div class="incremental">
 ```Haskell
-GHCi> sumWeight ofApples [1,2,3] + sumWeight ofOranges [1,2,3]
+GHCi> sumWeight ofApples [1,2,3] + weight ofOranges 6
 
 <interactive>:19:40:
     Couldn't match type ‘Orange’ with ‘Apple’
