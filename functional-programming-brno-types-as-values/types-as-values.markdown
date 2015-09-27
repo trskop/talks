@@ -433,10 +433,39 @@ https://hackage.haskell.org/package/Spock
 
 ## Outro
 
-Thank you for your attention.
+(Imagine sad music playing in the background.)
 
-If you have any questions then you can ask me personally, or on FPB mailing
-list, or on my personal email.
+**Thank you for your attention.**
+
+
+## Thanks And Credits
+
+My many thanks goes to Matej Kollár for making FPB happen and for kicking me in
+to actually doing this.
+
+Some of the libraries and tools used in this talk or while creating it:
+[aeson](https://hackage.haskell.org/package/aeson),
+[base](https://hackage.haskell.org/package/base),
+[bytestring](https://hackage.haskell.org/package/bytestring),
+[case-insensitive](https://hackage.haskell.org/package/case-insensitive),
+[GHC](https://www.haskell.org/ghc/),
+[hvect](https://hackage.haskell.org/package/hvect),
+[jq](https://stedolan.github.io/jq/),
+[pandoc](https://hackage.haskell.org/package/pandoc),
+[path-pieces](https://hackage.haskell.org/package/path-pieces),
+[process](https://hackage.haskell.org/package/process),
+[Slidy2](http://www.w3.org/Talks/Tools/Slidy2/),
+[Spock](https://hackage.haskell.org/package/Spock),
+[tagged](https://hackage.haskell.org/package/tagged),
+[text](https://hackage.haskell.org/package/text), and many others.
+
+
+## Co-Beginning
+
+If you have any questions then you can ask me personally, or on [FPB
+mailing](https://groups.google.com/d/forum/fpbrno) list, or on my personal
+email.
+
 
 <!--
 vim: filetype=markdown spell spelllang=en
