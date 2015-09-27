@@ -430,6 +430,12 @@ get ("haskell-package/by-star-trek-term" <//> varOf starTrekTerm)
     -> SpockCtxT ctx m ()
 ```
 
+```Haskell
+type family HVectElim (ts :: [*]) (a :: *) :: * where
+    HVectElim '[] a = a
+    HVectElim (t ': ts) a = t -> HVectElim ts a
+```
+
 ```
 [ someone@somewhere types-as-values ]$ curl localhost:3000/haskell-package/by-star-trek-term/spock
 https://hackage.haskell.org/package/Spock
