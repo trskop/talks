@@ -197,10 +197,13 @@ Maybe Int
 
 ```Haskell
 GHC.TypeLits.symbolVal :: KnownSymbol n => proxy n -> String
+GHC.TypeLits.natVal :: KnownNat n => proxy n -> Integer
 ```
 
 ```Haskell
 GHCi> :set -XDataKinds
+GHCi> :k "type-level-string"
+"type-level-string" :: Symbol
 GHCi> symbolVal (Proxy :: Proxy "type-level-string")
 "type-level-string"
 ```
