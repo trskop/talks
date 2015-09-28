@@ -478,9 +478,14 @@ Some of the libraries and tools used in this talk or while creating it:
 
 ## Co-Beginning
 
-If you have any questions then you can ask me personally, or on [FPB
-mailing](https://groups.google.com/d/forum/fpbrno) list, or on my personal
-email.
+If you have any questions then you can
+
+* ask me personally,
+* or on [FPB mailing](https://groups.google.com/d/forum/fpbrno) list,
+* or send me an email to Peter Trško \<<peter.trsko@gmail.com>\>.
+
+Social: [G+](https://www.google.com/+PeterTr%C5%A1ko) and
+[GitHub](https://github.com/trskop).
 
 
 <!--
