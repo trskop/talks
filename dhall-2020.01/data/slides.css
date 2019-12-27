@@ -1,0 +1,67 @@
+/* Based on:
+ * https://github.com/FPBrno/slides-template/blob/e5ee2451865329fe6df0ef32b9caf2af6c833301/slides.css
+ */
+html, body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+}
+div.toolbar {
+  display: none !important;
+}
+div.initial_prompt {
+   display: none !important;
+}
+div.slide h1 {
+  color: #22254e;
+  display: block;
+  text-align: center;
+  padding-top: 10%;
+}
+@import url(https://fonts.googleapis.com/css?family=Roboto:400,700);
+body {
+  font-family: Roboto;
+}
+code {
+  font-family: Roboto, monospace;
+}
+div.slide.titlepage {
+  background-image: url('./background-title-page.png');
+}
+div.slide {
+  background-image: url('./background-1.png');
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+
+  overflow: none;
+}
+div.figure {
+  margin: 0;
+  padding: 0;
+}
+div.figure .caption {
+  display: none !important;
+}
+div.slide img {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  border-style: solid;
+  border-width: 1px;
+  border-color: black;
+}
+div.vbox {
+  float: left;
+  height: 20%;
+  margin-top: -220px;
+  width: 70%;
+}
+div.hbox {
+  width:70%;
+  margin: 0 auto;
+  height: 70%;
+  overflow: none;
+  text-align: left;
+  clear: both;
+}
