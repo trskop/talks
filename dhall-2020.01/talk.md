@@ -105,6 +105,106 @@ TODO: How are integrity checksums calculated. Binary encoding.
 TODO: Where to read more.
 
 
+# Disintegrity (1)
+
+How not to run Bash scripts from the internet.
+
+`https://raw.githubusercontent.com/digital-asset/ghcide/master/fmt.sh`
+(`@da5ab701da02c3cd34d7da1e48803278f777d9db`):
+
+```Bash
+#!/usr/bin/env bash
+set -eou pipefail
+curl -sSL https://raw.github.com/ndmitchell/hlint/master/misc/run.sh | sh -s .
+```
+
+
+# Disintegrity (2)
+
+`https://raw.github.com/ndmitchell/hlint/master/misc/run.sh`
+(`@51096caede55b7dc6387e559e6bb866019d2f297`):
+
+```Bash
+#!/bin/sh
+curl -sSL https://raw.github.com/ndmitchell/neil/master/misc/run.sh | sh -s -- hlint $*
+```
+
+
+# Disintegrity (3)
+
+`https://raw.github.com/ndmitchell/neil/master/misc/run.sh`
+(`@80e8e6b9727929fc1366110874969f532ed47774`):
+
+```Bash
+#!/bin/sh
+# ... some stuff omitted
+RELEASES=$(curl --silent --show-error https://github.com/ndmitchell/$PACKAGE/releases)
+URL=https://github.com/$(echo $RELEASES | grep -o '\"[^\"]*-x86_64-'$OS$ESCEXT'\"' | sed s/\"//g | head -n1)
+VERSION=$(echo $URL | sed -n 's@.*-\(.*\)-x86_64-'$OS$ESCEXT'@\1@p')
+TEMP=$(mktemp -d .$PACKAGE-XXXXXX)
+
+cleanup(){
+    rm -r $TEMP
+}
+trap cleanup EXIT
+
+retry(){
+    ($@) && return
+    sleep 15
+    ($@) && return
+    sleep 15
+    $@
+}
+
+retry curl --progress-bar --location -o$TEMP/$PACKAGE$EXT $URL
+# ... some other stuff omitted
+```
+
+
+# Disintegrity (4)
+
+```Bash
+dhall hash <<< 'https://raw.github.com/ndmitchell/neil/master/misc/run.sh as Text'
+sha256:d7f106894d51ba3b1f06cdc899183765bee5b0316f86eb183ca20e013390c54d
+```
+
+
+# Disintegrity (5)
+
+```Bash
+dhall text \
+  <<< 'https://raw.github.com/ndmitchell/neil/master/misc/run.sh sha256:d7f106894d51ba3b1f06cdc899183765bee5b0316f86eb183ca20e013390c54d as Text \
+  | sh -s -- hlint .
+...
+```
+
+
+# Disintegrity (6)
+
+```Bash
+dhall text \
+  <<< 'https://raw.github.com/ndmitchell/neil/master/misc/run.sh sha256:d7f106894d51ba3b1f06cdc899183765bee5b0316f86eb183ca20e013390c54b as Text' \
+  | sh -s -- hlint .
+dhall:
+↳ https://raw.github.com/ndmitchell/neil/master/misc/run.sh sha256:b7f106894d51ba3b1f06cdc899183765bee5b0316f86eb183ca20e013390c54d as Text
+
+Error: Import integrity check failed
+
+Expected hash:
+
+↳ b7f106894d51ba3b1f06cdc899183765bee5b0316f86eb183ca20e013390c54d
+
+Actual hash:
+
+↳ d7f106894d51ba3b1f06cdc899183765bee5b0316f86eb183ca20e013390c54d
+
+
+1│ https://raw.github.com/ndmitchell/neil/master/misc/run.sh sha256:b7f106894d51ba3b1f06cdc899183765bee5b0316f86eb183ca20e013390c54d as Text
+
+(stdin):1:1
+```
+
+
 # Cache
 
 TODO: `~/.cache/dhall{,-haskell}`; what's the difference; why have it. Show

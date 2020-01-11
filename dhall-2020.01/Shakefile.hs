@@ -1,6 +1,6 @@
 #!/usr/bin/env stack
 {- stack script
-    --resolver lts-13.14
+    --resolver lts-14.20
     --package directory
     --package executable-path
     --package shake
@@ -79,9 +79,8 @@ shakeMain Directories{..} opts = shakeArgs opts $ do
         need
             [ src
             , outDir </> css
-            , outDir </> "background-1.png"
-            , outDir </> "background-title-page.png"
---          , outDir </> "servant-package-hierarchy.png"
+--          , outDir </> "background-1.png"
+--          , outDir </> "background-title-page.png"
             , outDir </> "every-brexit-algebra.jpeg"
             , outDir </> "every-brexit-anything.jpg"
             , outDir </> "every-brexit-configuration.png"
